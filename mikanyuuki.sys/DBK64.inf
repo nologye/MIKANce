@@ -1,0 +1,79 @@
+;
+; mikanyuuki64.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318}
+Provider=%ManufacturerName%
+CatalogFile=mikanyuuki64.cat
+DriverVer = 12/04/2022,11.34.37.526
+
+[DestinationDirs]
+DefaultDestDir = 12
+mikanyuuki64_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+mikanyuuki64.sys  = 1,,
+WdfCoInstaller01009.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64
+
+[Standard.NTamd64]
+%mikanyuuki64.DeviceDesc%=mikanyuuki64_Device, Root\mikanyuuki64 ; TODO: edit hw-id
+
+[mikanyuuki64_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+mikanyuuki64.sys
+
+;-------------- Service installation
+[mikanyuuki64_Device.NT.Services]
+AddService = mikanyuuki64,%SPSVCINST_ASSOCSERVICE%, mikanyuuki64_Service_Inst
+
+; -------------- mikanyuuki64 driver install sections
+[mikanyuuki64_Service_Inst]
+DisplayName    = %mikanyuuki64.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\mikanyuuki64.sys
+
+;
+;--- mikanyuuki64_Device Coinstaller installation ------
+;
+
+[mikanyuuki64_Device.NT.CoInstallers]
+AddReg=mikanyuuki64_Device_CoInstaller_AddReg
+CopyFiles=mikanyuuki64_Device_CoInstaller_CopyFiles
+
+[mikanyuuki64_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01009.dll,WdfCoInstaller"
+
+[mikanyuuki64_Device_CoInstaller_CopyFiles]
+WdfCoInstaller01009.dll
+
+[mikanyuuki64_Device.NT.Wdf]
+KmdfService =  mikanyuuki64, mikanyuuki64_wdfsect
+[mikanyuuki64_wdfsect]
+KmdfLibraryVersion = 1.9
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="mikanyuuki64" ;TODO: Replace with your manufacturer name
+ClassName="System" ; TODO: edit ClassName
+DiskName = "mikanyuuki64 Installation Disk"
+mikanyuuki64.DeviceDesc = "mikanyuuki64 Device"
+mikanyuuki64.SVCDESC = "mikanyuuki64 Service"
